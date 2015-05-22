@@ -1,0 +1,27 @@
+{
+    "appKeys": {},
+    "capabilities": [
+        "configurable"
+    ],
+    "companyName": "vlad.kazanovsky@gmail.com",
+    "longName": "Swiss Army Pebble",
+    "projectType": "native",
+    "resources": {
+        "media": [
+            {
+                "file": "images/Watchface_logo.png",
+                "menuIcon": true,
+                "name": "APP_LOGO",
+                "type": "png"
+            }
+        ]
+    },
+    "sdkVersion": "2",
+    "shortName": "SwissArmy",
+    "uuid": "75e45ed4-adec-423f-98ed-a16cbbc24cb9",
+    "versionCode": 1,
+    "versionLabel": "1.0",
+    "watchapp": {
+        "watchface": false
+    }
+}
