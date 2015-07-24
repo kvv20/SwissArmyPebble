@@ -10,7 +10,7 @@
   
 #define NUM_MENU_SECTIONS 2
 #define NUM_MENU_ICONS 3
-#define NUM_FIRST_MENU_ITEMS 3
+#define NUM_FIRST_MENU_ITEMS 1
 #define NUM_SECOND_MENU_ITEMS 1
 
 static Window *s_main_window;
@@ -155,6 +155,9 @@ static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuI
 }
 
 static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
+  if (cell_index->section == 0 && cell_index->row == 0){
+    send(KEY_BUTTON, BUTTON_SELECT);
+  }
   // Use the row to specify which item will receive the select action
   switch (cell_index->row) {
     // This is the menu item with the cycling icon
