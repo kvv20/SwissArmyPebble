@@ -17,6 +17,12 @@ static Window *s_main_window;
 static MenuLayer *s_menu_layer;
 //static TextLayer *s_text_layer;
 
+static char *menu_sections[NUM_MENU_SECTIONS] = {"Wireless", "Misc"};
+static char *menu_item_titles[NUM_MENU_SECTIONS][10] = {{"Wi-Fi"},{"Vibrate"}};
+static uint16_t menu_item_count[] = {1,1};
+static char *menu_item_statuses[NUM_MENU_SECTIONS][10];
+
+// char *menu_section[0] = "Wireless";
 /******************************* AppMessage ***********************************/
 
 static void send(int key, int message) {
@@ -96,14 +102,15 @@ static uint16_t menu_get_num_sections_callback(MenuLayer *menu_layer, void *data
 }
 
 static uint16_t menu_get_num_rows_callback(MenuLayer *menu_layer, uint16_t section_index, void *data) {
-  switch (section_index) {
-    case 0:
-      return NUM_FIRST_MENU_ITEMS;
-    case 1:
-      return NUM_SECOND_MENU_ITEMS;
-    default:
-      return 0;
-  }
+  return menu_item_count[section_index];
+//   switch (section_index) {
+//     case 0:
+//       return NUM_FIRST_MENU_ITEMS;
+//     case 1:
+//       return NUM_SECOND_MENU_ITEMS;
+//     default:
+//       return 0;
+//   }
 }
 
 static int16_t menu_get_header_height_callback(MenuLayer *menu_layer, uint16_t section_index, void *data) {
@@ -111,47 +118,50 @@ static int16_t menu_get_header_height_callback(MenuLayer *menu_layer, uint16_t s
 }
 
 static void menu_draw_header_callback(GContext* ctx, const Layer *cell_layer, uint16_t section_index, void *data) {
-  // Determine which section we're working with
-  switch (section_index) {
-    case 0:
-      // Draw title text in the section header
-      menu_cell_basic_header_draw(ctx, cell_layer, "Wireless");
-      break;
-    case 1:
-      menu_cell_basic_header_draw(ctx, cell_layer, "Something else");
-      break;
-  }
+   menu_cell_basic_header_draw(ctx, cell_layer,  menu_sections[section_index]);
+//   // Determine which section we're working with
+//   switch (section_index) {
+//     case 0:
+//       // Draw title text in the section header
+//       menu_cell_basic_header_draw(ctx, cell_layer,  "Wireless");
+//       break;
+//     case 1:
+//       menu_cell_basic_header_draw(ctx, cell_layer, "Something else");
+//       break;
+//   }
 }
 
 static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuIndex *cell_index, void *data) {
-  // Determine which section we're going to draw in
-  switch (cell_index->section) {
-    case 0:
-      // Use the row to specify which item we'll draw
-      switch (cell_index->row) {
-        case 0:
-          // This is a basic menu item with a title and subtitle
-          menu_cell_basic_draw(ctx, cell_layer, "Wi-Fi", "ON", NULL);
-          break;
-//         case 1:
-//           // This is a basic menu icon with a cycling icon
-//           menu_cell_basic_draw(ctx, cell_layer, "Item", "Select to cycle", NULL);
+  
+    menu_cell_basic_draw(ctx, cell_layer, menu_item_titles[cell_index->section][cell_index->row], "ON", NULL);
+//   // Determine which section we're going to draw in
+//   switch (cell_index->section) {
+//     case 0:
+//       // Use the row to specify which item we'll draw
+//       switch (cell_index->row) {
+//         case 0:
+//           // This is a basic menu item with a title and subtitle
+//           menu_cell_basic_draw(ctx, cell_layer, "Wi-Fi", "ON", NULL);
 //           break;
-//         case 2: 
-//           {
-//             menu_cell_basic_draw(ctx, cell_layer, "Icon Item", "Last item", NULL);
-//           }
+// //         case 1:
+// //           // This is a basic menu icon with a cycling icon
+// //           menu_cell_basic_draw(ctx, cell_layer, "Item", "Select to cycle", NULL);
+// //           break;
+// //         case 2: 
+// //           {
+// //             menu_cell_basic_draw(ctx, cell_layer, "Icon Item", "Last item", NULL);
+// //           }
+// //           break;
+//       }
+//       break;
+//     case 1:
+//       switch (cell_index->row) {
+//         case 0:
+//           // There is title draw for something more simple than a basic menu item
+//           menu_cell_title_draw(ctx, cell_layer, "Final Item");
 //           break;
-      }
-      break;
-    case 1:
-      switch (cell_index->row) {
-        case 0:
-          // There is title draw for something more simple than a basic menu item
-          menu_cell_title_draw(ctx, cell_layer, "Final Item");
-          break;
-      }
-  }
+//       }
+//   }
 }
 
 static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
