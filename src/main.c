@@ -1,28 +1,38 @@
 #include <pebble.h>
 
-#define KEY_BUTTON    0
-#define KEY_VIBRATE   1
+#define KEY_WRITE   0
+#define KEY_READ    1
+#define KEY_TOGGLE  2
+#define KEY_CONTROL 3
+#define KEY_STATUS  4
 
-#define BUTTON_UP     0
-#define BUTTON_SELECT 1
-#define BUTTON_DOWN   2
+// #define BUTTON_UP     0
+// #define BUTTON_SELECT 1
+// #define BUTTON_DOWN   2
   
   
 #define NUM_MENU_SECTIONS 2
-#define NUM_MENU_ICONS 3
-#define NUM_FIRST_MENU_ITEMS 1
-#define NUM_SECOND_MENU_ITEMS 1
+#define MAX_MENU_ITEMS 15
 
 static Window *s_main_window;
 static MenuLayer *s_menu_layer;
 //static TextLayer *s_text_layer;
 
 static char *menu_sections[NUM_MENU_SECTIONS] = {"Wireless", "Misc"};
-static char *menu_item_titles[NUM_MENU_SECTIONS][10] = {{"Wi-Fi"},{"Vibrate"}};
-static uint16_t menu_item_count[] = {1,1};
-static char *menu_item_statuses[NUM_MENU_SECTIONS][10];
+static char *menu_item_titles[NUM_MENU_SECTIONS][MAX_MENU_ITEMS] = {{"Wi-Fi"},{"Vibrate", "Ring"}};
+static int menu_item_to_send[NUM_MENU_SECTIONS][MAX_MENU_ITEMS] = {{KEY_TOGGLE},{KEY_CONTROL, KEY_CONTROL}};
+static uint16_t menu_item_count[] = {1,2};
+static char *menu_item_statuses[NUM_MENU_SECTIONS][MAX_MENU_ITEMS];
 
-// char *menu_section[0] = "Wireless";
+static char* get_status_text(int status){
+  if (status == 1){
+    return "ON";
+  }
+  if (status == -1){
+    return "OFF";
+  }
+  return "";
+}
 /******************************* AppMessage ***********************************/
 
 static void send(int key, int message) {
@@ -38,11 +48,19 @@ static void inbox_received_handler(DictionaryIterator *iterator, void *context) 
   // Get the first pair
   Tuple *t = dict_read_first(iterator);
 
+  int key = (int)(t->key / 256);
+  int menu_item_section = (int)((t->key % 256) / 16);
+  int menu_item = (t->key % 16);
   // Process all pairs present
   while(t != NULL) {
     // Process this pair's key
-    switch(t->key) {
-      case KEY_VIBRATE:
+    switch(key) {
+      case KEY_STATUS:
+      APP_LOG(APP_LOG_LEVEL_INFO, "STATUS for KEY %d is %d", key, (int)t->value->int32);
+        menu_item_statuses[menu_item_section][menu_item] = get_status_text((int)t->value->int32);
+        menu_layer_reload_data(s_menu_layer);
+        break;
+      case KEY_CONTROL:
         // Trigger vibration
 //         text_layer_set_text(s_text_layer, "Vibrate!");
         APP_LOG(APP_LOG_LEVEL_INFO, "Vibrate!");
@@ -72,45 +90,12 @@ static void outbox_sent_handler(DictionaryIterator *iterator, void *context) {
 
 /********************************* Buttons ************************************/
 
-// static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
-// //   text_layer_set_text(s_text_layer, "Select");
-
-//   send(KEY_BUTTON, BUTTON_SELECT);
-// }
-
-// static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
-// //   text_layer_set_text(s_text_layer, "Up");
-
-//   send(KEY_BUTTON, BUTTON_UP);
-// }
-
-// static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
-// //   text_layer_set_text(s_text_layer, "Down");
-
-//   send(KEY_BUTTON, BUTTON_DOWN);
-// }
-
-// static void click_config_provider(void *context) {
-  // Assign button handlers
-//   window_single_click_subscribe(BUTTON_ID_SELECT, select_click_handler);
-//   window_single_click_subscribe(BUTTON_ID_UP, up_click_handler);
-//   window_single_click_subscribe(BUTTON_ID_DOWN, down_click_handler);
-// }
-
 static uint16_t menu_get_num_sections_callback(MenuLayer *menu_layer, void *data) {
   return NUM_MENU_SECTIONS;
 }
 
 static uint16_t menu_get_num_rows_callback(MenuLayer *menu_layer, uint16_t section_index, void *data) {
   return menu_item_count[section_index];
-//   switch (section_index) {
-//     case 0:
-//       return NUM_FIRST_MENU_ITEMS;
-//     case 1:
-//       return NUM_SECOND_MENU_ITEMS;
-//     default:
-//       return 0;
-//   }
 }
 
 static int16_t menu_get_header_height_callback(MenuLayer *menu_layer, uint16_t section_index, void *data) {
@@ -119,79 +104,20 @@ static int16_t menu_get_header_height_callback(MenuLayer *menu_layer, uint16_t s
 
 static void menu_draw_header_callback(GContext* ctx, const Layer *cell_layer, uint16_t section_index, void *data) {
    menu_cell_basic_header_draw(ctx, cell_layer,  menu_sections[section_index]);
-//   // Determine which section we're working with
-//   switch (section_index) {
-//     case 0:
-//       // Draw title text in the section header
-//       menu_cell_basic_header_draw(ctx, cell_layer,  "Wireless");
-//       break;
-//     case 1:
-//       menu_cell_basic_header_draw(ctx, cell_layer, "Something else");
-//       break;
-//   }
 }
 
 static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuIndex *cell_index, void *data) {
   
-    menu_cell_basic_draw(ctx, cell_layer, menu_item_titles[cell_index->section][cell_index->row], "ON", NULL);
-//   // Determine which section we're going to draw in
-//   switch (cell_index->section) {
-//     case 0:
-//       // Use the row to specify which item we'll draw
-//       switch (cell_index->row) {
-//         case 0:
-//           // This is a basic menu item with a title and subtitle
-//           menu_cell_basic_draw(ctx, cell_layer, "Wi-Fi", "ON", NULL);
-//           break;
-// //         case 1:
-// //           // This is a basic menu icon with a cycling icon
-// //           menu_cell_basic_draw(ctx, cell_layer, "Item", "Select to cycle", NULL);
-// //           break;
-// //         case 2: 
-// //           {
-// //             menu_cell_basic_draw(ctx, cell_layer, "Icon Item", "Last item", NULL);
-// //           }
-// //           break;
-//       }
-//       break;
-//     case 1:
-//       switch (cell_index->row) {
-//         case 0:
-//           // There is title draw for something more simple than a basic menu item
-//           menu_cell_title_draw(ctx, cell_layer, "Final Item");
-//           break;
-//       }
-//   }
+    menu_cell_basic_draw(ctx, cell_layer, menu_item_titles[cell_index->section][cell_index->row], menu_item_statuses[cell_index->section][cell_index->row], NULL);
 }
 
 static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
-  if (cell_index->section == 0 && cell_index->row == 0){
-    send(KEY_BUTTON, BUTTON_SELECT);
-  }
-  // Use the row to specify which item will receive the select action
-  switch (cell_index->row) {
-    // This is the menu item with the cycling icon
-    case 1:
-//       // Cycle the icon
-//       s_current_icon = (s_current_icon + 1) % NUM_MENU_ICONS;
-//       // After changing the icon, mark the layer to have it updated
-//       layer_mark_dirty(menu_layer_get_layer(menu_layer));
-      break;
-  }
-
+    send(menu_item_to_send[cell_index->section][cell_index->row], (256 * cell_index->section + cell_index->row));
 }
 
 /******************************* main_window **********************************/
 
 static void main_window_load(Window *window) {
-  // Create main TextLayer
-//   s_text_layer = text_layer_create(GRect(0, 0, 144, 168));
-//   text_layer_set_font(s_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
-//   text_layer_set_text(s_text_layer, "Open Android app and press any button.");
-//   text_layer_set_text_alignment(s_text_layer, GTextAlignmentCenter);
-//   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_text_layer));
-  
-  
     // Now we prepare to initialize the menu layer
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_frame(window_layer);
@@ -215,8 +141,6 @@ static void main_window_load(Window *window) {
 }
 
 static void main_window_unload(Window *window) {
-  // Destroy main TextLayer
- // text_layer_destroy(s_text_layer);
   menu_layer_destroy(s_menu_layer);
 }
 
@@ -232,7 +156,6 @@ static void init(void) {
 
   // Create main Window
   s_main_window = window_create();
-//   window_set_click_config_provider(s_main_window, click_config_provider);
   window_set_window_handlers(s_main_window, (WindowHandlers) {
     .load = main_window_load,
     .unload = main_window_unload,
