@@ -5,6 +5,7 @@
 #define KEY_TOGGLE  2
 #define KEY_CONTROL 3
 #define KEY_STATUS  4
+#define KEY_VIBRATE 5
 
 // #define BUTTON_UP     0
 // #define BUTTON_SELECT 1
@@ -60,7 +61,7 @@ static void inbox_received_handler(DictionaryIterator *iterator, void *context) 
         menu_item_statuses[menu_item_section][menu_item] = get_status_text((int)t->value->int32);
         menu_layer_reload_data(s_menu_layer);
         break;
-      case KEY_CONTROL:
+      case KEY_VIBRATE:
         // Trigger vibration
 //         text_layer_set_text(s_text_layer, "Vibrate!");
         APP_LOG(APP_LOG_LEVEL_INFO, "Vibrate!");
@@ -135,6 +136,7 @@ static void main_window_load(Window *window) {
 
   // Bind the menu layer's click config provider to the window for interactivity
   menu_layer_set_click_config_onto_window(s_menu_layer, window);
+  send(KEY_READ, 0); //WiFi
 
   layer_add_child(window_layer, menu_layer_get_layer(s_menu_layer));
   
