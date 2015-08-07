@@ -20,9 +20,9 @@ static MenuLayer *s_menu_layer;
 //static TextLayer *s_text_layer;
 
 static char *menu_sections[NUM_MENU_SECTIONS] = {"Wireless", "Misc"};
-static char *menu_item_titles[NUM_MENU_SECTIONS][MAX_MENU_ITEMS] = {{"Wi-Fi"},{"Vibrate", "Ring"}};
-static int menu_item_to_send[NUM_MENU_SECTIONS][MAX_MENU_ITEMS] = {{KEY_TOGGLE},{KEY_CONTROL, KEY_CONTROL}};
-static uint16_t menu_item_count[] = {1,2};
+static char *menu_item_titles[NUM_MENU_SECTIONS][MAX_MENU_ITEMS] = {{"Wi-Fi"},{"Vibrate", "Ring", "Siren"}};
+static int menu_item_to_send[NUM_MENU_SECTIONS][MAX_MENU_ITEMS] = {{KEY_TOGGLE},{KEY_CONTROL, KEY_CONTROL, KEY_CONTROL}};
+static uint16_t menu_item_count[] = {1,3};
 static char *menu_item_statuses[NUM_MENU_SECTIONS][MAX_MENU_ITEMS];
 
 static char* get_status_text(int status){
